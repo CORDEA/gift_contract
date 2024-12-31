@@ -5,7 +5,7 @@ import '@ton/test-utils';
 
 describe('GiftContract', () => {
     let blockchain: Blockchain;
-    let deployer: SandboxContract<TreasuryContract>;
+    let agency: SandboxContract<TreasuryContract>;
     let giftContract: SandboxContract<GiftContract>;
 
     beforeEach(async () => {
@@ -13,12 +13,12 @@ describe('GiftContract', () => {
 
         giftContract = blockchain.openContract(await GiftContract.fromInit());
 
-        deployer = await blockchain.treasury('deployer');
+        agency = await blockchain.treasury('agency');
 
         const deployResult = await giftContract.send(
-            deployer.getSender(),
+            agency.getSender(),
             {
-                value: toNano('0.05'),
+                value: toNano('0.01'),
             },
             {
                 $$type: 'Deploy',
@@ -27,7 +27,7 @@ describe('GiftContract', () => {
         );
 
         expect(deployResult.transactions).toHaveTransaction({
-            from: deployer.address,
+            from: agency.address,
             to: giftContract.address,
             deploy: true,
             success: true,
@@ -35,7 +35,24 @@ describe('GiftContract', () => {
     });
 
     it('should deploy', async () => {
-        // the check is done inside beforeEach
-        // blockchain and giftContract are ready to use
+        const sender = await blockchain.treasury('sender');
+        const receiver = await blockchain.treasury('receiver');
+
+        const result = await giftContract.send(
+            sender.getSender(),
+            {
+                value: toNano('0.05'),
+            },
+            {
+                $$type: 'Gift',
+                to: receiver.address
+            }
+        );
+
+        expect(result.transactions).toHaveTransaction({
+            from: giftContract.address,
+            to: receiver.address,
+            success: true,
+        });
     });
 });

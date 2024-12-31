@@ -1,8 +1,15 @@
 import "@stdlib/deploy";
+message Gift {
+    to: Address;
+}
 
 contract GiftContract with Deployable {
-    // Empty init() function is present by default in all Tact contracts
-    // since v1.3.0, so the following may be omitted:
-    //
-    // init() {}
+    agency: Address;
+    init(){
+        self.agency = sender();
+    }
+
+    receive(gift: Gift){
+        send(SendParameters{to: gift.to, bounce: true, value: 0, mode: SendRemainingValue + SendIgnoreErrors});
+    }
 }

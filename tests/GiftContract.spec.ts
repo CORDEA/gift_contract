@@ -56,9 +56,37 @@ describe('GiftContract', () => {
         });
     });
 
+    it('should set currency rate', async () => {
+        const result = await giftContract.send(
+            agency.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'CurrencyRate',
+                rate: toNano('0.0123')
+            }
+        );
+
+        expect(result.transactions).toHaveTransaction({
+            from: agency.address,
+            success: true,
+        });
+    });
+
     it('should calculate tax', async () => {
         const sender = await blockchain.treasury('sender');
 
+        await giftContract.send(
+            agency.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'CurrencyRate',
+                rate: toNano('0.001')
+            }
+        );
         const result = await giftContract.send(
             sender.getSender(),
             {

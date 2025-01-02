@@ -8,13 +8,15 @@ message Tax {
 message TaxResult {
     tax: Int;
 }
-// 1 JPY = 0.001167 TON
-const jpyRate: Int = ton("0.001167");
-
+message CurrencyRate {
+    rate: Int as coins;
+}
 contract GiftContract with Deployable {
     agency: Address;
+    jpyRate: Int as coins;
     init(){
         self.agency = sender();
+        self.jpyRate = ton("0");
     }
 
     receive(gift: Gift){
@@ -26,8 +28,13 @@ contract GiftContract with Deployable {
         self.reply(TaxResult{tax: estimate}.toCell());
     }
 
+    receive(currencyRate: CurrencyRate){
+        require(sender() == self.agency, "Only agency can set currency rate");
+        self.jpyRate = currencyRate.rate;
+    }
+
     fun calculateTax(value: Int): Int {
-        let jpy = value / jpyRate;
+        let jpy = value / self.jpyRate;
         let rate = self.getTaxRate(jpy);
         return value * rate / 100;
     }

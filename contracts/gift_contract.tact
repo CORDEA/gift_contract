@@ -27,11 +27,33 @@ contract GiftContract with Deployable {
     }
 
     fun calculateTax(value: Int): Int {
-        return self.getTaxRate(value);
+        let jpy = value / jpyRate;
+        let rate = self.getTaxRate(jpy);
+        return value * rate / 100;
     }
 
-    fun getTaxRate(value: Int): Int {
-        let jpy = value / jpyRate;
-        return (jpy * 100) / 100;
+    fun getTaxRate(jpy: Int): Int {
+        if (jpy <= 10000000) {
+            return 10;
+        }
+        if (jpy <= 30000000) {
+            return 15;
+        }
+        if (jpy <= 50000000) {
+            return 20;
+        }
+        if (jpy <= 100000000) {
+            return 30;
+        }
+        if (jpy <= 200000000) {
+            return 40;
+        }
+        if (jpy <= 300000000) {
+            return 45;
+        }
+        if (jpy <= 600000000) {
+            return 50;
+        }
+        return 55;
     }
 }

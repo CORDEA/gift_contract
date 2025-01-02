@@ -56,7 +56,7 @@ describe('GiftContract', () => {
         });
     });
 
-    it('should calculate the tax', async () => {
+    it('should calculate tax', async () => {
         const sender = await blockchain.treasury('sender');
 
         const result = await giftContract.send(
@@ -77,7 +77,7 @@ describe('GiftContract', () => {
             body: beginCell().store(
                 storeTaxResult({
                     $$type: 'TaxResult',
-                    tax: BigInt(42)
+                    tax: BigInt(5000000),
                 })
             ).endCell(),
         });

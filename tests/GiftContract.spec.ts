@@ -1,6 +1,6 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { toNano } from '@ton/core';
-import { GiftContract } from '../wrappers/GiftContract';
+import { beginCell, toNano } from '@ton/core';
+import { GiftContract, storeTaxResult } from '../wrappers/GiftContract';
 import '@ton/test-utils';
 
 describe('GiftContract', () => {
@@ -53,6 +53,33 @@ describe('GiftContract', () => {
             from: giftContract.address,
             to: receiver.address,
             success: true,
+        });
+    });
+
+    it('should calculate the tax', async () => {
+        const sender = await blockchain.treasury('sender');
+
+        const result = await giftContract.send(
+            sender.getSender(),
+            {
+                value: toNano('0.01'),
+            },
+            {
+                $$type: 'Tax',
+                amount: toNano('0.05')
+            }
+        );
+
+        expect(result.transactions).toHaveTransaction({
+            from: giftContract.address,
+            to: sender.address,
+            success: true,
+            body: beginCell().store(
+                storeTaxResult({
+                    $$type: 'TaxResult',
+                    tax: BigInt(42)
+                })
+            ).endCell(),
         });
     });
 });

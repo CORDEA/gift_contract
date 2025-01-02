@@ -1,0 +1,3 @@
+scripts/ linguist-vendored
+wrappers/ linguist-vendored
+jest.config.ts linguist-vendored
